@@ -1,38 +1,18 @@
-[workspace]
-members = [
-    "worker",
-    "worker-build",
-    "worker-macros",
-    "worker-sandbox",
-    "worker-sys",
-    "examples/*",
-]
-exclude = ["examples/coredump"]
-resolver = "2"
+[package]
+name = "router-on-workers"
+version = "0.1.0"
+edition = "2021"
 
-[workspace.dependencies]
-worker = { path="./worker" }
+# https://github.com/rustwasm/wasm-pack/issues/1247
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = false
 
-[profile.release]
-# rustc supports two "optimize for size" levels:  opt-level = "s" and "z". 
-# These names were inherited from clang / LLVM and are not too descriptive
-# but "z" is meant to give the idea that it produces smaller binaries than "s".
-# https://docs.rust-embedded.org/book/unsorted/speed-vs-size.html#optimize-for-size
-opt-level = "z"
+[lib]
+crate-type = ["cdylib"]
 
-# by compiling as a single codegen unit (i.e. not in parallel),
-# it's possible to reduce size even further at the expense of
-# compilation time
-codegen-units = 1
+[dependencies]
+serde = "1.0.188"
+worker = { workspace=true }
 
-# by enabling link-time optimization, we can reduce size even further
-# by telling cargo to optimize at the link stage (in addition to the
-# normal optimizations during the compilation stage)
-lto = true
-
-# by overriding our dependencies' compilation settings, we can further optimize for size
-# https://docs.rust-embedded.org/book/unsorted/speed-vs-size.html#optimizing-dependencies
-[profile.release.package."*"]
-codegen-units = 1
-opt-level = "z"
-
+[dev-dependencies]
+tokio = { version = "1", features = ["full"] }
